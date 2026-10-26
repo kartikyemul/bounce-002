@@ -1,4 +1,4 @@
-# Bounce 002 - frontend
+# Bounce 002
 React + Vite + Tailwind (JavaScript).
 
     npm install
