@@ -8,6 +8,7 @@ import Signup from './pages/Signup'
 import Customer from './pages/Customer'
 import Incharge from './pages/Incharge'
 import Admin from './pages/Admin'
+import NotFound from './pages/NotFound'
 
 export default function App() {
   return (
@@ -20,6 +21,7 @@ export default function App() {
         <Route path="/app" element={<RequireRole role="Customer"><Customer /></RequireRole>} />
         <Route path="/incharge" element={<RequireRole role="Court in-charge"><Incharge /></RequireRole>} />
         <Route path="/admin" element={<RequireRole role="Admin"><Admin /></RequireRole>} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
       <Footer />
     </>

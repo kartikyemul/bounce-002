@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import CourtSVG from '../components/CourtSVG'
+import HowItWorks from '../components/HowItWorks'
 
 const facilities = [
   ['Online booking', 'Pick a court and a time slot, pay, and get a confirmation.'],
@@ -28,7 +29,9 @@ export default function Home() {
         <CourtSVG className="w-full rounded-lg shadow-xl" />
       </section>
 
-      <section id="courts" className="mt-24 bg-court py-14 text-mist">
+      <HowItWorks />
+
+      <section id="courts" className="mt-20 bg-court py-14 text-mist">
         <div className="mx-auto max-w-6xl px-5">
           <h2 className="text-3xl font-extrabold tracking-tight">Pick your court</h2>
           <div className="mt-8 grid grid-cols-2 gap-6 md:grid-cols-4">
@@ -53,6 +56,11 @@ export default function Home() {
             </div>
           ))}
         </dl>
+      </section>
+
+      <section className="mx-auto mt-20 max-w-3xl px-5 text-center">
+        <h2 className="text-3xl font-extrabold tracking-tight">Ready for your first game?</h2>
+        <Link to="/signup" className="mt-6 inline-block rounded-full bg-deep px-7 py-3 font-bold text-mist">Create a free account</Link>
       </section>
     </main>
   )
