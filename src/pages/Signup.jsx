@@ -20,10 +20,19 @@ export default function Signup() {
     setDone(Object.keys(er).length === 0)
   }
 
+  if (done) {
+    return (
+      <main className="mx-auto max-w-md px-5 pt-10">
+        <h1 className="text-4xl font-extrabold tracking-tight">Welcome, {f.name.trim().split(' ')[0]}</h1>
+        <p className="mt-4 text-deep/75">Your account is ready. In the live version we will email a verification link to {f.email} first.</p>
+        <Link to="/login" className="mt-8 inline-block rounded-full bg-ball px-6 py-3 font-bold">Log in and book a court</Link>
+      </main>
+    )
+  }
+
   const field = (k, label, type = 'text') => (
     <label className="block text-sm font-semibold">{label}
-      <input type={type} value={f[k]} onChange={set(k)}
-        className="mt-1 w-full rounded-md border border-deep/30 bg-white px-3 py-2" />
+      <input type={type} value={f[k]} onChange={set(k)} className="mt-1 w-full rounded-md border border-deep/30 bg-white px-3 py-2" />
       {errors[k] && <span className="text-sm text-red-700">{errors[k]}</span>}
     </label>
   )
@@ -37,7 +46,6 @@ export default function Signup() {
         {field('password', 'Password', 'password')}
         {field('confirm', 'Confirm password', 'password')}
         <button className="w-full rounded-full bg-ball py-3 font-bold">Create account</button>
-        {done && <p className="text-sm">Details look good. We will email a verification link once the backend is connected.</p>}
       </form>
       <p className="mt-6 text-sm">Already have an account? <Link to="/login" className="font-bold underline">Log in</Link></p>
     </main>

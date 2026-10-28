@@ -11,7 +11,7 @@ export default function CourtSVG({ className = '' }) {
         <line x1="130" y1="50" x2="192" y2="50" />
         <line x1="100" y1="4" x2="100" y2="96" strokeWidth="2.2" strokeDasharray="2 2" />
       </g>
-      <circle cx="54" cy="30" r="4" fill="#E4F03C" />
+      <circle className="ball-hop" cx="54" cy="30" r="4" fill="#E4F03C" />
     </svg>
   )
 }
