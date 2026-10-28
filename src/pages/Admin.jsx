@@ -1,23 +1,30 @@
 import { useState } from 'react'
 import DashShell from '../components/DashShell'
-import { courts, hours, taken } from '../data/mock'
+import { useBookings } from '../context/Bookings'
+import { courts, hours, taken, days } from '../data/mock'
 
 const emailOk = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)
+const today = days()[0]
 
 export default function Admin() {
+  const { list } = useBookings()
   const [emails, setEmails] = useState({})
   const [invited, setInvited] = useState({})
   const [err, setErr] = useState({})
-  const total = courts.reduce((n, c) => n + hours.filter((h) => taken(c.id, h)).length, 0)
+
+  const count = (id) =>
+    hours.filter((h) => taken(id, h, 0) || list.some((b) => b.court === id && b.date === today.key && b.h === h)).length
+  const total = courts.reduce((n, c) => n + count(c.id), 0)
 
   const invite = (id) => {
     if (!emailOk(emails[id] || '')) return setErr({ ...err, [id]: 'Enter a valid email address.' })
-    setErr({ ...err, [id]: '' }); setInvited({ ...invited, [id]: emails[id] })
+    setErr({ ...err, [id]: '' })
+    setInvited({ ...invited, [id]: emails[id] })
   }
 
   return (
     <DashShell title="Admin overview">
-      <p className="text-lg">{total} bookings today across {courts.length} courts. {Object.keys(invited).length} of {courts.length} courts have an in-charge.</p>
+      <p className="text-lg">{total} bookings today across {courts.length} courts, {list.length} made online. {Object.keys(invited).length} of {courts.length} courts have an in-charge.</p>
       <section>
         <h2 className="text-xl font-extrabold">Courts and in-charges</h2>
         <ul className="mt-2 divide-y divide-deep/15">
@@ -25,12 +32,10 @@ export default function Admin() {
             <li key={c.id} className="grid items-start gap-2 py-4 sm:grid-cols-3">
               <div>
                 <p className="font-bold">{c.name}</p>
-                <p className="text-sm text-deep/70">{hours.filter((h) => taken(c.id, h)).length} bookings today</p>
+                <p className="text-sm text-deep/70">{count(c.id)} of {hours.length} slots booked today</p>
               </div>
               <div className="sm:col-span-2">
-                {invited[c.id] ? (
-                  <p>Invite sent to {invited[c.id]} (demo)</p>
-                ) : (
+                {invited[c.id] ? <p>Invite sent to {invited[c.id]} (demo)</p> : (
                   <div className="flex gap-2">
                     <input aria-label={`In-charge email for ${c.name}`} placeholder="In-charge email" value={emails[c.id] || ''}
                       onChange={(e) => setEmails({ ...emails, [c.id]: e.target.value })}
