@@ -1,0 +1,19 @@
+services:
+  db:
+    image: postgres:17
+    container_name: bounce002-db
+    environment:
+      POSTGRES_DB: ${DB_NAME:-bounce002}
+      POSTGRES_USER: ${DB_USER:-bounce}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-bounce_dev_password}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-bounce} -d ${DB_NAME:-bounce002}"]
+      interval: 5s
+      retries: 10
+
+volumes:
+  pgdata:
