@@ -1,25 +1,31 @@
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useState } from 'react'
+import * as api from '../api'
 
-const KEY = 'bounce002.bookings'
 const Ctx = createContext(null)
 export const useBookings = () => useContext(Ctx)
 
-const load = () => {
-  try { return JSON.parse(localStorage.getItem(KEY)) || [] } catch { return [] }
-}
-const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7)
-
-// saved in this browser only, until the backend and database replace it
 export function BookingsProvider({ children }) {
-  const [list, setList] = useState(load)
-  useEffect(() => {
-    try { localStorage.setItem(KEY, JSON.stringify(list)) } catch { /* storage unavailable */ }
-  }, [list])
+  const [list, setList] = useState([])
+  const [error, setError] = useState('')
 
-  const add = (b) => setList((l) => [...l, { ...b, id: uid(), checkedIn: false }])
-  const cancel = (id) => setList((l) => l.filter((b) => b.id !== id))
-  const checkIn = (id) => setList((l) => l.map((b) => (b.id === id ? { ...b, checkedIn: !b.checkedIn } : b)))
+  const refresh = useCallback(async () => {
+    try {
+      setList((await api.upcoming()).map(api.toBooking))
+      setError('')
+    } catch (e) {
+      setError(e.message)
+    }
+  }, [])
+  useEffect(() => { refresh() }, [refresh])
+
+  // runs a change, reloads the list, and returns an error message ('' means it worked)
+  const run = async (fn) => {
+    try { await fn(); await refresh(); return '' } catch (e) { await refresh(); return e.message }
+  }
+  const add = (b) => run(() => api.book(b.court, b.date, b.h))
+  const cancel = (id) => run(() => api.cancel(id))
+  const checkIn = (id) => run(() => api.checkIn(id))
   const isBooked = (court, date, h) => list.some((b) => b.court === court && b.date === date && b.h === h)
 
-  return <Ctx.Provider value={{ list, add, cancel, checkIn, isBooked }}>{children}</Ctx.Provider>
+  return <Ctx.Provider value={{ list, error, add, cancel, checkIn, isBooked }}>{children}</Ctx.Provider>
 }
