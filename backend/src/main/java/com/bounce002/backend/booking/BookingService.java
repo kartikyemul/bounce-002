@@ -47,9 +47,27 @@ public class BookingService {
         return bookings.findActive(courtId, from, day.plusDays(1).atStartOfDay(zone).toInstant());
     }
 
+    /** Every active booking from the start of today (club time) onwards, all courts. */
+    public List<Booking> fromToday() {
+        return bookings.findFrom(LocalDate.now(zone).atStartOfDay(zone).toInstant());
+    }
+
     public void cancel(Long id) {
-        var b = bookings.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Booking not found"));
+        var b = find(id);
         b.setStatus("CANCELLED");
         bookings.save(b);
+    }
+
+    public Booking toggleCheckIn(Long id) {
+        var b = find(id);
+        if ("CANCELLED".equals(b.getStatus())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "That booking was cancelled");
+        }
+        b.setStatus("CHECKED_IN".equals(b.getStatus()) ? "CONFIRMED" : "CHECKED_IN");
+        return bookings.save(b);
+    }
+
+    private Booking find(Long id) {
+        return bookings.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Booking not found"));
     }
 }

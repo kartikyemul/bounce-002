@@ -22,6 +22,12 @@ public class BookingController {
         return service.forDay(courtId, date);
     }
 
+    @GetMapping("/upcoming")
+    public List<Booking> fromToday() { return service.fromToday(); }
+
+    @PatchMapping("/{id}/check-in")
+    public Booking checkIn(@PathVariable Long id) { return service.toggleCheckIn(id); }
+
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void cancel(@PathVariable Long id) { service.cancel(id); }
