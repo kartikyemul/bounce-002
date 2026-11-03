@@ -16,6 +16,3 @@ export const days = () =>
       sub: d.toLocaleDateString(undefined, { day: 'numeric', month: 'short' }),
     }
   })
-
-// fake "already booked by others" rule until the backend exists
-export const taken = (court, h, i = 0) => (court * 7 + h * 3 + i * 2) % 5 === 0

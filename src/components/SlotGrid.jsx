@@ -1,12 +1,13 @@
-import { hours, fmt, taken } from '../data/mock'
+import { hours, fmt } from '../data/mock'
 import { useBookings } from '../context/Bookings'
+import { slotInstant } from '../api'
 
 export default function SlotGrid({ court, day, selected, onPick }) {
   const { isBooked } = useBookings()
   return (
     <div className="grid grid-cols-3 gap-2 sm:grid-cols-5 md:grid-cols-7">
       {hours.map((h) => {
-        const busy = taken(court, h, day.i) || isBooked(court, day.key, h)
+        const busy = isBooked(court, day.key, h) || slotInstant(day.key, h) <= new Date()
         const on = selected === h
         return (
           <button key={h} disabled={busy} aria-pressed={on} onClick={() => onPick(h)}

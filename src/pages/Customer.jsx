@@ -13,11 +13,11 @@ export default function Customer() {
   const [slot, setSlot] = useState(null)
   const [toast, setToast] = useState('')
 
-  const confirm = () => {
-    add({ court, date: day.key, h: slot })
-    setToast(`Booked Court ${court}, ${day.label} at ${fmt(slot)}`)
+  const confirm = async () => {
+    const problem = await add({ court, date: day.key, h: slot })
+    setToast(problem || `Booked Court ${court}, ${day.label} at ${fmt(slot)}`)
     setSlot(null)
-    setTimeout(() => setToast(''), 3000)
+    setTimeout(() => setToast(''), 3500)
   }
   const label = (k) => week.find((d) => d.key === k)?.label ?? k
   const mine = [...list].sort((a, b) => a.date.localeCompare(b.date) || a.h - b.h)
@@ -40,7 +40,7 @@ export default function Customer() {
           ))}
         </div>
       </div>
-      <p className="text-sm text-deep/70">One-hour slots. Greyed-out slots are already booked.</p>
+      <p className="text-sm text-deep/70">One-hour slots. Greyed-out slots are booked or already past.</p>
       <SlotGrid court={court} day={day} selected={slot} onPick={setSlot} />
       {slot !== null && (
         <div className="flex items-center justify-between rounded-md bg-court p-4 text-mist" style={{ animation: 'fade-up .25s ease-out both' }}>
@@ -49,7 +49,7 @@ export default function Customer() {
         </div>
       )}
       <section>
-        <h2 className="text-xl font-extrabold">Your bookings</h2>
+        <h2 className="text-xl font-extrabold">Upcoming bookings</h2>
         {mine.length === 0 ? (
           <p className="mt-2 text-deep/70">No bookings yet. Pick a day, a court and a slot above to book your first game.</p>
         ) : (

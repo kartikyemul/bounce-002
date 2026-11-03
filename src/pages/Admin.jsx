@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import DashShell from '../components/DashShell'
 import { useBookings } from '../context/Bookings'
-import { courts, hours, taken, days } from '../data/mock'
+import { courts, hours, days } from '../data/mock'
 
 const emailOk = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)
 const today = days()[0]
@@ -12,8 +12,7 @@ export default function Admin() {
   const [invited, setInvited] = useState({})
   const [err, setErr] = useState({})
 
-  const count = (id) =>
-    hours.filter((h) => taken(id, h, 0) || list.some((b) => b.court === id && b.date === today.key && b.h === h)).length
+  const count = (id) => list.filter((b) => b.court === id && b.date === today.key).length
   const total = courts.reduce((n, c) => n + count(c.id), 0)
 
   const invite = (id) => {
@@ -24,7 +23,7 @@ export default function Admin() {
 
   return (
     <DashShell title="Admin overview">
-      <p className="text-lg">{total} bookings today across {courts.length} courts, {list.length} made online. {Object.keys(invited).length} of {courts.length} courts have an in-charge.</p>
+      <p className="text-lg">{total} bookings today across {courts.length} courts, {list.length} upcoming in total. {Object.keys(invited).length} of {courts.length} courts have an in-charge.</p>
       <section>
         <h2 className="text-xl font-extrabold">Courts and in-charges</h2>
         <ul className="mt-2 divide-y divide-deep/15">
