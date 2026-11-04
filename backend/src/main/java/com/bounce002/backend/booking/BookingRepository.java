@@ -13,4 +13,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     @Query("select b from Booking b where b.startsAt >= :from and b.status <> 'CANCELLED' order by b.startsAt")
     List<Booking> findFrom(@Param("from") Instant from);
+
+    @Query("select b from Booking b where b.userId = :userId and b.startsAt >= :from and b.status <> 'CANCELLED' order by b.startsAt")
+    List<Booking> findMine(@Param("userId") Long userId, @Param("from") Instant from);
 }

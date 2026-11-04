@@ -1,5 +1,6 @@
 package com.bounce002.backend.booking;
 
+import com.bounce002.backend.auth.AuthUser;
 import com.bounce002.backend.court.CourtRepository;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -23,7 +24,7 @@ public class BookingService {
         this.zone = ZoneId.of(zone);
     }
 
-    public Booking book(BookingRequest req) {
+    public Booking book(BookingRequest req, AuthUser me) {
         var court = courts.findById(req.courtId())
                 .filter(c -> c.isActive())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Court not found"));
@@ -32,6 +33,7 @@ public class BookingService {
 
         var b = new Booking();
         b.setCourtId(court.getId());
+        b.setUserId(me.id());
         b.setStartsAt(req.startsAt());
         b.setEndsAt(req.startsAt().plus(SlotRules.LENGTH));
         try {
@@ -52,19 +54,33 @@ public class BookingService {
         return bookings.findFrom(LocalDate.now(zone).atStartOfDay(zone).toInstant());
     }
 
-    public void cancel(Long id) {
+    public void cancel(Long id, AuthUser me) {
         var b = find(id);
+        if (!b.isOwnedBy(me.id()) && !canManage(b, me)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can only cancel your own bookings");
+        }
         b.setStatus("CANCELLED");
         bookings.save(b);
     }
 
-    public Booking toggleCheckIn(Long id) {
+    public Booking toggleCheckIn(Long id, AuthUser me) {
         var b = find(id);
+        if (!canManage(b, me)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only this court's in-charge can check players in");
+        }
         if ("CANCELLED".equals(b.getStatus())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "That booking was cancelled");
         }
         b.setStatus("CHECKED_IN".equals(b.getStatus()) ? "CONFIRMED" : "CHECKED_IN");
         return bookings.save(b);
+    }
+
+    public List<Booking> mine(AuthUser me) {
+        return bookings.findMine(me.id(), LocalDate.now(zone).atStartOfDay(zone).toInstant());
+    }
+
+    private boolean canManage(Booking b, AuthUser me) {
+        return "ADMIN".equals(me.role()) || ("INCHARGE".equals(me.role()) && b.getCourtId().equals(me.courtId()));
     }
 
     private Booking find(Long id) {
