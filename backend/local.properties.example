@@ -1,0 +1,3 @@
+# copy this file to local.properties (git ignores it) and choose your own values
+bounce.admin.email=bounce002@gmail.com
+bounce.admin.password=bounce002
