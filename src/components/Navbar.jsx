@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/Auth'
 
-const home = { Customer: '/app', 'Court in-charge': '/incharge', Admin: '/admin' }
+const home = { CUSTOMER: '/app', INCHARGE: '/incharge', ADMIN: '/admin' }
 
 export default function Navbar() {
   const { role, logout } = useAuth()
@@ -18,7 +18,7 @@ export default function Navbar() {
         {role ? (
           <>
             <Link to={home[role]} className="rounded-full bg-deep px-4 py-2 text-mist">My dashboard</Link>
-            <button onClick={() => { logout(); nav('/') }}>Log out</button>
+            <button onClick={async () => { await logout(); nav('/') }}>Log out</button>
           </>
         ) : (
           <>
