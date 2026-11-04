@@ -1,11 +1,13 @@
 import DashShell from '../components/DashShell'
 import { useBookings } from '../context/Bookings'
+import { useAuth } from '../context/Auth'
 import { hours, fmt, days } from '../data/mock'
 
-const COURT = 2 // later this comes from the logged-in in-charge's account
 const today = days()[0]
 
 export default function Incharge() {
+  const { user } = useAuth()
+  const COURT = user.courtId
   const { list, checkIn } = useBookings()
   const mine = list.filter((b) => b.court === COURT && b.date === today.key)
   const here = mine.filter((b) => b.checkedIn).length

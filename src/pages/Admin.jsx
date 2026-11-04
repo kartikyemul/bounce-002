@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import DashShell from '../components/DashShell'
 import { useBookings } from '../context/Bookings'
+import * as api from '../api'
 import { courts, hours, days } from '../data/mock'
 
 const emailOk = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)
@@ -8,44 +9,61 @@ const today = days()[0]
 
 export default function Admin() {
   const { list } = useBookings()
+  const [staff, setStaff] = useState([])
   const [emails, setEmails] = useState({})
-  const [invited, setInvited] = useState({})
   const [err, setErr] = useState({})
+  const [notice, setNotice] = useState('')
+
+  const load = useCallback(() => api.inchargeList().then(setStaff).catch((e) => setErr((x) => ({ ...x, page: e.message }))), [])
+  useEffect(() => { load() }, [load])
 
   const count = (id) => list.filter((b) => b.court === id && b.date === today.key).length
   const total = courts.reduce((n, c) => n + count(c.id), 0)
+  const staffFor = (id) => staff.find((s) => s.courtId === id)
 
-  const invite = (id) => {
-    if (!emailOk(emails[id] || '')) return setErr({ ...err, [id]: 'Enter a valid email address.' })
-    setErr({ ...err, [id]: '' })
-    setInvited({ ...invited, [id]: emails[id] })
+  const invite = async (id) => {
+    const email = (emails[id] || '').trim()
+    if (!emailOk(email)) return setErr({ ...err, [id]: 'Enter a valid email address.' })
+    try {
+      await api.invite(email, id)
+      setErr({ ...err, [id]: '' })
+      setNotice('Invite created. In development mode the invite link is printed in the backend log.')
+      await load()
+    } catch (e) {
+      setErr({ ...err, [id]: e.message })
+    }
   }
 
   return (
     <DashShell title="Admin overview">
-      <p className="text-lg">{total} bookings today across {courts.length} courts, {list.length} upcoming in total. {Object.keys(invited).length} of {courts.length} courts have an in-charge.</p>
+      <p className="text-lg">{total} bookings today across {courts.length} courts, {list.length} upcoming in total. {staff.length} of {courts.length} courts have an in-charge.</p>
+      {err.page && <p role="alert" className="text-sm font-semibold text-red-700">{err.page}</p>}
+      {notice && <p role="status" className="rounded-md bg-ball/60 p-3 text-sm font-semibold">{notice}</p>}
       <section>
         <h2 className="text-xl font-extrabold">Courts and in-charges</h2>
         <ul className="mt-2 divide-y divide-deep/15">
-          {courts.map((c) => (
-            <li key={c.id} className="grid items-start gap-2 py-4 sm:grid-cols-3">
-              <div>
-                <p className="font-bold">{c.name}</p>
-                <p className="text-sm text-deep/70">{count(c.id)} of {hours.length} slots booked today</p>
-              </div>
-              <div className="sm:col-span-2">
-                {invited[c.id] ? <p>Invite sent to {invited[c.id]} (demo)</p> : (
-                  <div className="flex gap-2">
-                    <input aria-label={`In-charge email for ${c.name}`} placeholder="In-charge email" value={emails[c.id] || ''}
-                      onChange={(e) => setEmails({ ...emails, [c.id]: e.target.value })}
-                      className="w-full rounded-md border border-deep/30 bg-white px-3 py-2" />
-                    <button onClick={() => invite(c.id)} className="shrink-0 rounded-full bg-deep px-4 py-2 text-sm font-bold text-mist">Send invite</button>
-                  </div>
-                )}
-                {err[c.id] && <p className="mt-1 text-sm text-red-700">{err[c.id]}</p>}
-              </div>
-            </li>
-          ))}
+          {courts.map((c) => {
+            const s = staffFor(c.id)
+            return (
+              <li key={c.id} className="grid items-start gap-2 py-4 sm:grid-cols-3">
+                <div>
+                  <p className="font-bold">{c.name}</p>
+                  <p className="text-sm text-deep/70">{count(c.id)} of {hours.length} slots booked today</p>
+                </div>
+                <div className="sm:col-span-2">
+                  {s ? <p>{s.email}, {s.active ? 'active' : 'invite pending'}</p> : (
+                    <div className="flex gap-2">
+                      <input aria-label={`In-charge email for ${c.name}`} placeholder="In-charge email" value={emails[c.id] || ''}
+                        onChange={(e) => setEmails({ ...emails, [c.id]: e.target.value })}
+                        className="w-full rounded-md border border-deep/30 bg-white px-3 py-2" />
+                      <button onClick={() => invite(c.id)} className="shrink-0 rounded-full bg-deep px-4 py-2 text-sm font-bold text-mist">Send invite</button>
+                    </div>
+                  )}
+                  {err[c.id] && <p className="mt-1 text-sm text-red-700">{err[c.id]}</p>}
+                </div>
+              </li>
+            )
+          })}
         </ul>
       </section>
     </DashShell>

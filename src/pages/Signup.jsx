@@ -1,31 +1,45 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import * as api from '../api'
 
 const emailOk = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)
 
 export default function Signup() {
   const [f, setF] = useState({ name: '', email: '', password: '', confirm: '' })
   const [errors, setErrors] = useState({})
+  const [serverError, setServerError] = useState('')
   const [done, setDone] = useState(false)
+  const [busy, setBusy] = useState(false)
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault()
     const er = {}
     if (f.name.trim().length < 2) er.name = 'Enter your full name.'
-    if (!emailOk(f.email)) er.email = 'Enter a valid email address.'
+    if (!emailOk(f.email.trim())) er.email = 'Enter a valid email address.'
     if (f.password.length < 8) er.password = 'Use at least 8 characters.'
     if (f.confirm !== f.password) er.confirm = 'Passwords do not match.'
     setErrors(er)
-    setDone(Object.keys(er).length === 0)
+    setServerError('')
+    if (Object.keys(er).length) return
+    setBusy(true)
+    try {
+      await api.signup(f.name.trim(), f.email.trim(), f.password)
+      setDone(true)
+    } catch (err) {
+      setServerError(err.message)
+    } finally {
+      setBusy(false)
+    }
   }
 
   if (done) {
     return (
       <main className="mx-auto max-w-md px-5 pt-10">
-        <h1 className="text-4xl font-extrabold tracking-tight">Welcome, {f.name.trim().split(' ')[0]}</h1>
-        <p className="mt-4 text-deep/75">Your account is ready. In the live version we will email a verification link to {f.email} first.</p>
-        <Link to="/login" className="mt-8 inline-block rounded-full bg-ball px-6 py-3 font-bold">Log in and book a court</Link>
+        <h1 className="text-4xl font-extrabold tracking-tight">Check your email</h1>
+        <p className="mt-4 text-deep/75">We sent a verification link to {f.email}. Open it to activate your account, then log in.</p>
+        <p className="mt-3 text-sm text-deep/60">Development mode: the link is printed in the backend log instead of being emailed.</p>
+        <Link to="/login" className="mt-8 inline-block rounded-full bg-ball px-6 py-3 font-bold">Go to log in</Link>
       </main>
     )
   }
@@ -45,7 +59,8 @@ export default function Signup() {
         {field('email', 'Email', 'email')}
         {field('password', 'Password', 'password')}
         {field('confirm', 'Confirm password', 'password')}
-        <button className="w-full rounded-full bg-ball py-3 font-bold">Create account</button>
+        {serverError && <p role="alert" className="text-sm font-semibold text-red-700">{serverError}</p>}
+        <button disabled={busy} className="w-full rounded-full bg-ball py-3 font-bold disabled:opacity-60">{busy ? 'Creating...' : 'Create account'}</button>
       </form>
       <p className="mt-6 text-sm">Already have an account? <Link to="/login" className="font-bold underline">Log in</Link></p>
     </main>

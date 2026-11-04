@@ -5,6 +5,8 @@ import { RequireRole } from './context/Auth'
 import Home from './pages/Home'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
+import VerifyEmail from './pages/VerifyEmail'
+import AcceptInvite from './pages/AcceptInvite'
 import Customer from './pages/Customer'
 import Incharge from './pages/Incharge'
 import Admin from './pages/Admin'
@@ -18,9 +20,11 @@ export default function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/app" element={<RequireRole role="Customer"><Customer /></RequireRole>} />
-        <Route path="/incharge" element={<RequireRole role="Court in-charge"><Incharge /></RequireRole>} />
-        <Route path="/admin" element={<RequireRole role="Admin"><Admin /></RequireRole>} />
+        <Route path="/verify" element={<VerifyEmail />} />
+        <Route path="/accept-invite" element={<AcceptInvite />} />
+        <Route path="/app" element={<RequireRole role="CUSTOMER"><Customer /></RequireRole>} />
+        <Route path="/incharge" element={<RequireRole role="INCHARGE"><Incharge /></RequireRole>} />
+        <Route path="/admin" element={<RequireRole role="ADMIN"><Admin /></RequireRole>} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Footer />

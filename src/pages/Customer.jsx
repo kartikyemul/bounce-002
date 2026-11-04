@@ -7,7 +7,7 @@ import { courts, days, fmt } from '../data/mock'
 const week = days()
 
 export default function Customer() {
-  const { list, add, cancel } = useBookings()
+  const { mine: list, add, cancel } = useBookings()
   const [court, setCourt] = useState(1)
   const [day, setDay] = useState(week[0])
   const [slot, setSlot] = useState(null)
