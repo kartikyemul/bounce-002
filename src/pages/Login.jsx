@@ -38,6 +38,7 @@ export default function Login() {
         <label className="block text-sm font-semibold">Password
           <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} className={input} />
         </label>
+        <Link to="/forgot-password" className="block text-sm font-bold underline">Forgot password?</Link>
         {error && <p role="alert" className="text-sm font-semibold text-red-700">{error}</p>}
         <button disabled={busy} className="w-full rounded-full bg-ball py-3 font-bold disabled:opacity-60">{busy ? 'Logging in...' : 'Log in'}</button>
       </form>

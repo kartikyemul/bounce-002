@@ -7,6 +7,7 @@ import Login from './pages/Login'
 import Signup from './pages/Signup'
 import VerifyEmail from './pages/VerifyEmail'
 import AcceptInvite from './pages/AcceptInvite'
+import ForgotPassword from './pages/ForgotPassword'
 import Customer from './pages/Customer'
 import Incharge from './pages/Incharge'
 import Admin from './pages/Admin'
@@ -22,6 +23,7 @@ export default function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/verify" element={<VerifyEmail />} />
         <Route path="/accept-invite" element={<AcceptInvite />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/app" element={<RequireRole role="CUSTOMER"><Customer /></RequireRole>} />
         <Route path="/incharge" element={<RequireRole role="INCHARGE"><Incharge /></RequireRole>} />
         <Route path="/admin" element={<RequireRole role="ADMIN"><Admin /></RequireRole>} />
