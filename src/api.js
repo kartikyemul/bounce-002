@@ -36,6 +36,8 @@ const post = (path, body) => request(path, { method: 'POST', body: JSON.stringif
 // accounts
 export const signup = (fullName, email, password) => post('/api/auth/signup', { fullName, email, password })
 export const verify = (token) => post('/api/auth/verify', { token })
+export const forgotPassword = (email) => post('/api/auth/forgot-password', { email })
+export const resetPassword = (token, password) => post('/api/auth/reset-password', { token, password })
 export const login = (email, password) => post('/api/auth/login', { email, password })
 export const logout = () => request('/api/auth/logout', { method: 'POST' })
 export const me = () => request('/api/auth/me')

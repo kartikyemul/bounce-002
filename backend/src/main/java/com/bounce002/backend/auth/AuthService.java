@@ -112,6 +112,24 @@ public class AuthService {
         return users.findByRole("INCHARGE").stream().map(u -> new StaffInfo(u.getEmail(), u.getCourtId(), u.getPasswordHash() != null)).toList();
     }
 
+    /** Always looks the same from outside, so nobody can use it to find out who has an account. */
+    public void forgotPassword(String rawEmail) {
+        users.findByEmail(rawEmail.trim().toLowerCase())
+                .filter(u -> u.getPasswordHash() != null)
+                .ifPresent(u -> {
+                    String link = frontendUrl + "/reset-password?token=" + tokens.create(u, "RESET", Duration.ofHours(1));
+                    email.send(u.getEmail(), "Reset your Bounce 002 password", "Open this link to choose a new password (valid for 1 hour):\n" + link);
+                });
+    }
+
+    public void resetPassword(String token, String password) {
+        checkPassword(password);
+        var u = tokens.consume(token, "RESET").orElseThrow(() -> fail(HttpStatus.BAD_REQUEST, "This link is invalid or has expired"));
+        u.setPasswordHash(encoder.encode(password));
+        users.save(u);
+        tokens.revokeAll(u.getId()); // signs the user out everywhere
+    }
+
     private String cleanEmail(String raw) {
         String e = raw.trim().toLowerCase();
         if (e.length() > 255 || !EMAIL.matcher(e).matches()) throw fail(HttpStatus.BAD_REQUEST, "Enter a valid email address");

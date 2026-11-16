@@ -15,6 +15,8 @@ public class AuthController {
                          @NotBlank @Size(min = 8, max = 72) String password) {}
     record TokenRequest(@NotBlank String token) {}
     record LoginRequest(@NotBlank String email, @NotBlank String password) {}
+    record ForgotRequest(@NotBlank @Size(max = 255) String email) {}
+    record ResetRequest(@NotBlank String token, @NotBlank @Size(min = 8, max = 72) String password) {}
     record AcceptInvite(@NotBlank String token, @NotBlank @Size(min = 2, max = 100) String fullName,
                         @NotBlank @Size(min = 8, max = 72) String password) {}
 
@@ -46,6 +48,18 @@ public class AuthController {
     public Map<String, String> acceptInvite(@Valid @RequestBody AcceptInvite r) {
         auth.acceptInvite(r.token(), r.fullName(), r.password());
         return Map.of("message", "Your account is ready. You can log in now.");
+    }
+
+    @PostMapping("/forgot-password")
+    public Map<String, String> forgot(@Valid @RequestBody ForgotRequest r) {
+        auth.forgotPassword(r.email());
+        return Map.of("message", "If an account exists, a reset link was sent.");
+    }
+
+    @PostMapping("/reset-password")
+    public Map<String, String> reset(@Valid @RequestBody ResetRequest r) {
+        auth.resetPassword(r.token(), r.password());
+        return Map.of("message", "Password changed. You can log in now.");
     }
 
     @GetMapping("/me")

@@ -10,6 +10,7 @@ import java.util.Base64;
 import java.util.HexFormat;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /** Random tokens for sessions, email verification and invites. Only a hash is stored in the database. */
 @Service
@@ -52,6 +53,11 @@ public class TokenService {
 
     public void revoke(String raw) {
         tokens.findByTokenHash(hash(raw)).ifPresent(tokens::delete);
+    }
+
+    @Transactional
+    public void revokeAll(Long userId) {
+        tokens.deleteByUserId(userId);
     }
 
     static String hash(String raw) {
