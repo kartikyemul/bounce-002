@@ -59,6 +59,9 @@ public class BookingService {
         if (!b.isOwnedBy(me.id()) && !canManage(b, me)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can only cancel your own bookings");
         }
+        if (!canManage(b, me) && !SlotRules.canCancel(b.getStartsAt(), Instant.now())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Bookings can only be cancelled up to 2 hours before they start");
+        }
         b.setStatus("CANCELLED");
         bookings.save(b);
     }

@@ -27,4 +27,11 @@ public final class SlotRules {
         }
         return null;
     }
+
+    public static final Duration CANCEL_NOTICE = Duration.ofHours(2);
+
+    /** Customers may cancel until two hours before the slot starts. */
+    public static boolean canCancel(Instant start, Instant now) {
+        return !now.isAfter(start.minus(CANCEL_NOTICE));
+    }
 }

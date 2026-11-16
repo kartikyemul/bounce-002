@@ -2,6 +2,7 @@ import { useState } from 'react'
 import DashShell from '../components/DashShell'
 import SlotGrid from '../components/SlotGrid'
 import { useBookings } from '../context/Bookings'
+import { slotInstant } from '../api'
 import { courts, days, fmt } from '../data/mock'
 
 const week = days()
@@ -57,7 +58,10 @@ export default function Customer() {
             {mine.map((m) => (
               <li key={m.id} className="flex items-center justify-between py-3">
                 <span>Court {m.court}, {label(m.date)} at {fmt(m.h)}</span>
-                <button onClick={() => cancel(m.id)} className="text-sm font-bold underline">Cancel booking</button>
+                {slotInstant(m.date, m.h) - new Date() > 2 * 60 * 60 * 1000 ? (
+                  <button onClick={async () => { const p = await cancel(m.id); if (p) { setToast(p); setTimeout(() => setToast(''), 3500) } }}
+                    className="text-sm font-bold underline">Cancel booking</button>
+                ) : <span className="text-sm text-deep/60">Too late to cancel</span>}
               </li>
             ))}
           </ul>

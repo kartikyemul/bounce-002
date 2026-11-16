@@ -1,7 +1,9 @@
 package com.bounce002.backend.booking;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -31,5 +33,15 @@ class SlotRulesTest {
     @Test
     void rejectsThePast() {
         assertEquals("Pick a time in the future", SlotRules.check(Instant.parse("2026-10-31T04:30:00Z"), zone, now));
+    }
+
+    @Test
+    void allowsCancellingWellInAdvance() {
+        assertTrue(SlotRules.canCancel(Instant.parse("2026-11-02T04:30:00Z"), Instant.parse("2026-11-02T01:00:00Z")));
+    }
+
+    @Test
+    void blocksCancellingInsideTwoHours() {
+        assertFalse(SlotRules.canCancel(Instant.parse("2026-11-02T04:30:00Z"), Instant.parse("2026-11-02T03:00:00Z")));
     }
 }
