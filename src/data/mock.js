@@ -1,4 +1,4 @@
-export const courts = [1, 2, 3, 4].map((n) => ({ id: n, name: `Court ${n}` }))
+export const CURRENCY = '₹'
 export const hours = Array.from({ length: 14 }, (_, i) => 8 + i)
 export const fmt = (h) => `${h % 12 || 12} ${h < 12 ? 'am' : 'pm'}`
 

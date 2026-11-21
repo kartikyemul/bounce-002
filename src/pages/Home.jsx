@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom'
 import CourtSVG from '../components/CourtSVG'
 import HowItWorks from '../components/HowItWorks'
+import { useCourts } from '../context/Courts'
+import { CURRENCY } from '../data/mock'
 
 const facilities = [
   ['Online booking', 'Pick a court and a time slot, pay, and get a confirmation.'],
@@ -11,6 +13,7 @@ const facilities = [
 ]
 
 export default function Home() {
+  const { courts, error } = useCourts()
   return (
     <main>
       <section className="mx-auto grid max-w-6xl items-center gap-10 px-5 pt-8 md:grid-cols-2">
@@ -34,12 +37,16 @@ export default function Home() {
       <section id="courts" className="mt-20 bg-court py-14 text-mist">
         <div className="mx-auto max-w-6xl px-5">
           <h2 className="text-3xl font-extrabold tracking-tight">Pick your court</h2>
+          {error && <p role="alert" className="mt-4 font-semibold">{error}</p>}
+          {!error && courts.length === 0 && <p className="mt-4">Loading courts...</p>}
           <div className="mt-8 grid grid-cols-2 gap-6 md:grid-cols-4">
-            {[1, 2, 3, 4].map((n) => (
-              <div key={n}>
+            {courts.map((c) => (
+              <div key={c.id}>
                 <CourtSVG className="w-full rounded-md ring-2 ring-mist/40" />
-                <p className="mt-3 font-bold">Court {n}</p>
-                <p className="text-sm text-mist/75">Details coming soon</p>
+                <p className="mt-3 font-bold">{c.name}</p>
+                <p className="text-sm text-mist/75">{c.setting === 'INDOOR' ? 'Indoor' : 'Outdoor'}, {c.surface}</p>
+                {c.description && <p className="text-sm text-mist/75">{c.description}</p>}
+                <p className="mt-1 text-sm font-bold">{CURRENCY}{c.pricePerHour} per hour</p>
               </div>
             ))}
           </div>
