@@ -44,6 +44,10 @@ export const me = () => request('/api/auth/me')
 export const acceptInvite = (token, fullName, password) => post('/api/auth/accept-invite', { token, fullName, password })
 export const inchargeList = () => request('/api/admin/incharges')
 export const invite = (email, courtId) => post('/api/admin/incharges', { email, courtId })
+export const courts = () => request('/api/courts')
+export const adminCourts = () => request('/api/admin/courts')
+export const saveCourt = (id, data) =>
+  request(id ? `/api/admin/courts/${id}` : '/api/admin/courts', { method: id ? 'PUT' : 'POST', body: JSON.stringify(data) })
 
 // bookings
 export const slotInstant = (date, h) => new Date(`${date}T${String(h).padStart(2, '0')}:00:00${OFFSET}`)
