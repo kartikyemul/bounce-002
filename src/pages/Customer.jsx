@@ -3,26 +3,35 @@ import DashShell from '../components/DashShell'
 import SlotGrid from '../components/SlotGrid'
 import { useBookings } from '../context/Bookings'
 import { slotInstant } from '../api'
-import { courts, days, fmt } from '../data/mock'
+import { useCourts } from '../context/Courts'
+import { days, fmt, CURRENCY } from '../data/mock'
 
 const week = days()
 
 export default function Customer() {
   const { mine: list, add, cancel } = useBookings()
-  const [court, setCourt] = useState(1)
+  const { courts } = useCourts()
+  const [picked, setCourt] = useState(null)
+  const court = picked ?? courts[0]?.id
+  const cur = courts.find((c) => c.id === court)
+  const nameOf = (id) => courts.find((c) => c.id === id)?.name ?? `Court ${id}`
   const [day, setDay] = useState(week[0])
   const [slot, setSlot] = useState(null)
   const [toast, setToast] = useState('')
 
   const confirm = async () => {
     const problem = await add({ court, date: day.key, h: slot })
-    setToast(problem || `Booked Court ${court}, ${day.label} at ${fmt(slot)}`)
+    setToast(problem || `Booked ${cur?.name}, ${day.label} at ${fmt(slot)}`)
     setSlot(null)
     setTimeout(() => setToast(''), 3500)
   }
   const label = (k) => week.find((d) => d.key === k)?.label ?? k
   const mine = [...list].sort((a, b) => a.date.localeCompare(b.date) || a.h - b.h)
   const pill = (on) => `rounded-full px-4 py-2 text-sm font-semibold ${on ? 'bg-deep text-mist' : 'bg-deep/10 hover:bg-deep/20'}`
+
+  if (!courts.length) {
+    return <DashShell title="Book a court"><p className="text-deep/70">No courts are open for booking right now.</p></DashShell>
+  }
 
   return (
     <DashShell title="Book a court">
@@ -45,7 +54,7 @@ export default function Customer() {
       <SlotGrid court={court} day={day} selected={slot} onPick={setSlot} />
       {slot !== null && (
         <div className="flex items-center justify-between rounded-md bg-court p-4 text-mist" style={{ animation: 'fade-up .25s ease-out both' }}>
-          <p className="font-semibold">Court {court}, {day.label} at {fmt(slot)}</p>
+          <p className="font-semibold">{cur?.name}, {day.label} at {fmt(slot)}, {CURRENCY}{cur?.pricePerHour}</p>
           <button onClick={confirm} className="rounded-full bg-ball px-5 py-2 font-bold text-deep">Confirm booking</button>
         </div>
       )}
@@ -57,7 +66,7 @@ export default function Customer() {
           <ul className="mt-2 divide-y divide-deep/15">
             {mine.map((m) => (
               <li key={m.id} className="flex items-center justify-between py-3">
-                <span>Court {m.court}, {label(m.date)} at {fmt(m.h)}</span>
+                <span>{nameOf(m.court)}, {label(m.date)} at {fmt(m.h)}</span>
                 {slotInstant(m.date, m.h) - new Date() > 2 * 60 * 60 * 1000 ? (
                   <button onClick={async () => { const p = await cancel(m.id); if (p) { setToast(p); setTimeout(() => setToast(''), 3500) } }}
                     className="text-sm font-bold underline">Cancel booking</button>

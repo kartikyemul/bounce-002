@@ -1,6 +1,7 @@
 import DashShell from '../components/DashShell'
 import { useBookings } from '../context/Bookings'
 import { useAuth } from '../context/Auth'
+import { useCourts } from '../context/Courts'
 import { hours, fmt, days } from '../data/mock'
 
 const today = days()[0]
@@ -8,12 +9,13 @@ const today = days()[0]
 export default function Incharge() {
   const { user } = useAuth()
   const COURT = user.courtId
+  const { courts } = useCourts()
   const { list, checkIn } = useBookings()
   const mine = list.filter((b) => b.court === COURT && b.date === today.key)
   const here = mine.filter((b) => b.checkedIn).length
 
   return (
-    <DashShell title={`Court ${COURT} today`}>
+    <DashShell title={`${courts.find((c) => c.id === COURT)?.name ?? 'Your court'} today`}>
       <p className="text-lg">{mine.length} bookings today, {here} checked in.</p>
       <ul className="divide-y divide-deep/15">
         {hours.map((h) => {
